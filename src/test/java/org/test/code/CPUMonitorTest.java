@@ -1,10 +1,12 @@
 package org.test.code;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by dmitriy_varygin on 15.10.16.
@@ -21,7 +23,7 @@ public class CPUMonitorTest {
 
         assertTrue(cpuUsage.containsKey("All"));
         assertNotNull(cpuUsage.get("All"));
-        assertNotNull(cpuUsage.get("0"));
+        cpuUsage.values().forEach(Assert::assertNotNull);
 
         System.out.println(cpuUsage);
     }
