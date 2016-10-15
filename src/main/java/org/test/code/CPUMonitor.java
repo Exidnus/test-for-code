@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 class CPUMonitor implements ICPUMonitor {
@@ -70,6 +71,8 @@ class CPUMonitor implements ICPUMonitor {
             return cpuUsage;
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            Optional.ofNullable(process).ifPresent(Process::destroy);
         }
     }
 
