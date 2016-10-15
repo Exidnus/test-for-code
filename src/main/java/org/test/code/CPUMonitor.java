@@ -34,22 +34,13 @@ class CPUMonitor implements ICPUMonitor {
         }
     }
 
-    public Process p = null;
-
     public double GET_cpuUsage() {
         BufferedReader MBR = null;
 
         try {
-            if (p != null) {
-                p.destroy();
-                p = null;
-            }
+            Process process = Runtime.getRuntime().exec("mpstat -P ALL 1 1");
 
-            Runtime runtime = Runtime.getRuntime();
-
-            p = runtime.exec("mpstat -P ALL 1 1");
-
-            InputStream mpstatInputStream = p.getInputStream();
+            InputStream mpstatInputStream = process.getInputStream();
             MBR = new BufferedReader(new InputStreamReader(mpstatInputStream));
 
             Map<String, Double> cpuUsageList = new HashMap<String, Double>();
@@ -98,16 +89,9 @@ class CPUMonitor implements ICPUMonitor {
     public Map<String, Double> getAllCpuUsage() {
         BufferedReader msR = null;
         try {
-            if (p != null) {
-                p.destroy();
-                p = null;
-            }
+            Process process = Runtime.getRuntime().exec("mpstat -P ALL 1 1");
 
-            Runtime r = Runtime.getRuntime();
-
-            p = r.exec("mpstat -P ALL 1 1");
-
-            InputStream is = p.getInputStream();
+            InputStream is = process.getInputStream();
             msR = new BufferedReader(new InputStreamReader(is));
 
             Map<String, Double> cpuUsageList = new HashMap<String, Double>();
@@ -152,36 +136,23 @@ class CPUMonitor implements ICPUMonitor {
         return null;
     }
 
-    @Deprecated
-    @Override
-    public Map<String, Double> gEtaLL_CPU_Usage() {
-        return getAllCpuUsage();
-    }
-
     @Override
     public int getCountOfCores() {
-        BufferedReader чтец = null;
+        BufferedReader reader = null;
         try {
-            if (p != null) {
-                p.destroy();
-                p = null;
-            }
+            Process process = Runtime.getRuntime().exec("mpstat -P ALL 1 1");
 
-            Runtime runtime = Runtime.getRuntime();
-
-            p = runtime.exec("mpstat -P ALL 1 1");
-
-            InputStream mpstatInputStream = p.getInputStream();
-            чтец = new BufferedReader(new InputStreamReader(mpstatInputStream));
+            InputStream mpstatInputStream = process.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(mpstatInputStream));
 
             Map<String, Double> cpuUsageList = new HashMap<String, Double>();
 
-            чтец.readLine();
-            чтец.readLine();
-            чтец.readLine();
+            reader.readLine();
+            reader.readLine();
+            reader.readLine();
 
             // Проверяем на null
-            String строка = чтец.readLine();
+            String строка = reader.readLine();
             if (строка == null) {
                 throw new NullPointerException();
             }
@@ -194,7 +165,7 @@ class CPUMonitor implements ICPUMonitor {
             // Объявляем i равное  0
             int i = 0;
 
-            while ((строка = чтец.readLine()) != null && строка.length() > 1) {
+            while ((строка = reader.readLine()) != null && строка.length() > 1) {
                 splittedString = строка.replaceAll(",", ".").split("\\s+");
                 idleValue = Double.parseDouble(splittedString[IDLE_COLUMN_INDEX]);
 
@@ -207,9 +178,9 @@ class CPUMonitor implements ICPUMonitor {
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
-            if (чтец != null) {
+            if (reader != null) {
                 try {
-                    чтец.close();
+                    reader.close();
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -220,26 +191,13 @@ class CPUMonitor implements ICPUMonitor {
         return 0;
     }
 
-    @Deprecated
-    @Override
-    public int get_Count_Of_CoreМетод() {
-        return getCountOfCores();
-    }
-
     // Преобразовать в строчку
     public String toString() {
         BufferedReader mpstatBufferedReader = null;
         try {
-            if (p != null) {
-                p.destroy();
-                p = null;
-            }
+            final Process process = Runtime.getRuntime().exec("mpstat -P ALL 1 1");
 
-            Runtime runtime = Runtime.getRuntime();
-
-            p = runtime.exec("mpstat -P ALL 1 1");
-
-            InputStream mpstatInputStream = p.getInputStream();
+            InputStream mpstatInputStream = process.getInputStream();
             mpstatBufferedReader = new BufferedReader(new InputStreamReader(mpstatInputStream));
 
             Map<String, Double> cpuUsageList = new HashMap<String, Double>();
@@ -282,5 +240,17 @@ class CPUMonitor implements ICPUMonitor {
         }
 
         return "";
+    }
+
+    @Deprecated
+    @Override
+    public Map<String, Double> gEtaLL_CPU_Usage() {
+        return getAllCpuUsage();
+    }
+
+    @Deprecated
+    @Override
+    public int get_Count_Of_CoreМетод() {
+        return getCountOfCores();
     }
 }
