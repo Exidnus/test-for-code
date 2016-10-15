@@ -16,32 +16,6 @@ class CPUMonitor implements ICPUMonitor {
     private static final int IDLE_COLUMN_INDEX = 11;
     private static final int ONE_HUNDRED_PERCENT_USAGE_CPU = 100;
 
-    enum Result {
-        OK, FAIL;
-    }
-
-    class SomeTest {
-        private int number;
-
-        SomeTest() {
-        }
-
-        public int getNumber() {
-            return number;
-        }
-
-        public void setNumber(int number) {
-            this.number = number;
-        }
-
-        @Override
-        public String toString() {
-            return "SomeTest{" +
-                    "number=" + number +
-                    '}';
-        }
-    }
-
     @Override
     public double getCpuUsage() {
         return getAllCpuUsage().get("All");
@@ -50,11 +24,6 @@ class CPUMonitor implements ICPUMonitor {
     @Override
     public int getCountOfCores() {
         return getAllCpuUsage().size() - 1;
-    }
-
-    @Override
-    public String toString() {
-        return getAllCpuUsage().toString();
     }
 
     @Override
@@ -111,20 +80,8 @@ class CPUMonitor implements ICPUMonitor {
         cpuUsage.put(key, ONE_HUNDRED_PERCENT_USAGE_CPU - idleValue);
     }
 
-    @Deprecated
-    public double GET_cpuUsage() {
-        return getCpuUsage();
-    }
-
-    @Deprecated
     @Override
-    public Map<String, Double> gEtaLL_CPU_Usage() {
-        return getAllCpuUsage();
-    }
-
-    @Deprecated
-    @Override
-    public int get_Count_Of_CoreМетод() {
-        return getCountOfCores();
+    public String toString() {
+        return getAllCpuUsage().toString();
     }
 }
