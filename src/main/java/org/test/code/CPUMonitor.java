@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 class CPUMonitor implements ICPUMonitor {
 
     private static final String MPSTAT_COMMAND = "mpstat -P ALL 1 1";
     private static final String WHITE_SPACE_SPLITTER = "\\s+";
     private static final int IDLE_COLUMN_INDEX = 11;
+    private static final int ONE_HUNDRED_PERCENT_USAGE_CPU = 100;
 
     enum Result {
         OK, FAIL;
@@ -94,20 +94,21 @@ class CPUMonitor implements ICPUMonitor {
     private void putAllCpuUsage(final Map<String, Double> cpuUsage, final BufferedReader reader) throws IOException {
         final String averageStatistics = reader.readLine();
         Objects.requireNonNull(averageStatistics);
-        final String[] splittedStrings = averageStatistics.replaceAll(",", ".").split(WHITE_SPACE_SPLITTER);
-        final Double idleValue = Double.parseDouble(splittedStrings[IDLE_COLUMN_INDEX]);
-        cpuUsage.put("All", 100 - idleValue);
+        parseStatisticsAndPutInMap(cpuUsage, averageStatistics, "All");
     }
 
     private void putEveryCoreUsage(final Map<String, Double> cpuUsage, final BufferedReader reader) throws IOException {
         int i = 0;
         String statisticsAboutCurrentCore;
         while ((statisticsAboutCurrentCore = reader.readLine()) != null && statisticsAboutCurrentCore.length() > 1) {
-            final String[] splittedStrings = statisticsAboutCurrentCore.replaceAll(",", ".").split(WHITE_SPACE_SPLITTER);
-            final Double idleValue = Double.parseDouble(splittedStrings[IDLE_COLUMN_INDEX]);
-            cpuUsage.put(String.valueOf(i), 100 - idleValue);
-            ++i;
+            parseStatisticsAndPutInMap(cpuUsage, statisticsAboutCurrentCore, String.valueOf(i++));
         }
+    }
+
+    private void parseStatisticsAndPutInMap(final Map<String, Double> cpuUsage, final String statistics, final String key) {
+        final String[] splittedStrings = statistics.replaceAll(",", ".").split(WHITE_SPACE_SPLITTER);
+        final double idleValue = Double.parseDouble(splittedStrings[IDLE_COLUMN_INDEX]);
+        cpuUsage.put(key, ONE_HUNDRED_PERCENT_USAGE_CPU - idleValue);
     }
 
     @Deprecated
