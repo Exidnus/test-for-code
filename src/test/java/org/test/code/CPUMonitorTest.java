@@ -30,6 +30,13 @@ public class CPUMonitorTest {
     public void shouldGetCountOfCore() {
         final int count = cpuMonitor.getCountOfCores();
         assertTrue(count > 0);
-        System.out.println(count);
+        System.out.println("Count of cores: " + count);
+    }
+
+    @Test
+    public void shouldGetCpuUsage() {
+        final double cpuUsage = cpuMonitor.getCpuUsage();
+        assertTrue(cpuUsage > 0.0);
+        System.out.println("CPU Usage: " + cpuUsage);
     }
 }

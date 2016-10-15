@@ -34,7 +34,8 @@ class CPUMonitor implements ICPUMonitor {
         }
     }
 
-    public double GET_cpuUsage() {
+    @Override
+    public double getCpuUsage() {
         BufferedReader MBR = null;
 
         try {
@@ -240,6 +241,11 @@ class CPUMonitor implements ICPUMonitor {
         }
 
         return "";
+    }
+
+    @Deprecated
+    public double GET_cpuUsage() {
+        return getCpuUsage();
     }
 
     @Deprecated

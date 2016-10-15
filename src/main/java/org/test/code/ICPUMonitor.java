@@ -8,6 +8,8 @@ public interface ICPUMonitor {
 
     int getCountOfCores();
 
+    double getCpuUsage();
+
     static ICPUMonitor getDefaultImpl() {
         return new CPUMonitor();
     }
