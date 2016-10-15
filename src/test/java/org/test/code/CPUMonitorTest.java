@@ -39,4 +39,12 @@ public class CPUMonitorTest {
         assertTrue(cpuUsage > 0.0);
         System.out.println("CPU Usage: " + cpuUsage);
     }
+
+    @Test
+    public void shouldGetStringWorkingFine() {
+        final String str = cpuMonitor.toString();
+        assertNotNull(str);
+        assertTrue(str.length() > 0);
+        System.out.println(str);
+    }
 }

@@ -7,10 +7,13 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 class CPUMonitor implements ICPUMonitor {
 
     private static final String MPSTAT_COMMAND = "mpstat -P ALL 1 1";
+    private static final String WHITE_SPACE_SPLITTER = "\\s+";
+    private static final int IDLE_COLUMN_INDEX = 11;
 
     enum Result {
         OK, FAIL;
@@ -40,40 +43,17 @@ class CPUMonitor implements ICPUMonitor {
 
     @Override
     public double getCpuUsage() {
-        final Process process = executeMpstatCommand();
-        try (InputStream is = process.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+        return getAllCpuUsage().get("All");
+    }
 
-            reader.readLine();
-            reader.readLine();
-            reader.readLine();
+    @Override
+    public int getCountOfCores() {
+        return getAllCpuUsage().size() - 1;
+    }
 
-            String currentLine = reader.readLine();
-            Objects.requireNonNull(currentLine);
-
-            final int idleColumnIndex = 11;
-            String[] s = currentLine.replaceAll(",", ".").split("\\s+");
-            Double idleValue = Double.parseDouble(s[idleColumnIndex]);
-
-            final Map<String, Double> cpuUsageList = new HashMap<>();
-            cpuUsageList.put("All", 100 - idleValue);
-
-            int i = 0;
-
-            while ((currentLine = reader.readLine()) != null && currentLine.length() > 1) {
-                s = currentLine.replaceAll(",", ".").split("\\s+");
-                idleValue = Double.parseDouble(s[idleColumnIndex]);
-
-                cpuUsageList.put(String.valueOf(i), 100 - idleValue);
-                ++i;
-            }
-
-            return cpuUsageList.get("All");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
+    @Override
+    public String toString() {
+        return getAllCpuUsage().toString();
     }
 
     @Override
@@ -82,119 +62,48 @@ class CPUMonitor implements ICPUMonitor {
         try (InputStream is = process.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
-            reader.readLine();
-            reader.readLine();
-            reader.readLine();
+            skipThreeLines(reader);
+            final Map<String, Double> cpuUsage = new HashMap<>();
+            putAllCpuUsage(cpuUsage, reader);
+            putEveryCoreUsage(cpuUsage, reader);
 
-            String currentLine = reader.readLine();
-            Objects.requireNonNull(currentLine);
-
-            final int idleColumnIndex = 11;
-            String[] splittedString = currentLine.replaceAll(",", ".").split("\\s+");
-            Double idleValue = Double.parseDouble(splittedString[idleColumnIndex]);
-
-            final Map<String, Double> cpuUsageList = new HashMap<>();
-            cpuUsageList.put("All", 100 - idleValue);
-
-            int i = 0;
-
-            while ((currentLine = reader.readLine()) != null && currentLine.length() > 1) {
-                splittedString = currentLine.replaceAll(",", ".").split("\\s+");
-                idleValue = Double.parseDouble(splittedString[idleColumnIndex]);
-
-                cpuUsageList.put(String.valueOf(i), 100 - idleValue);
-                ++i;
-            }
-
-            return cpuUsageList;
+            return cpuUsage;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException(ex);
         }
-
-        return null;
-    }
-
-    @Override
-    public int getCountOfCores() {
-        final Process process = executeMpstatCommand();
-        try (InputStream is = process.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
-
-            reader.readLine();
-            reader.readLine();
-            reader.readLine();
-
-            String currentLine = reader.readLine();
-            Objects.requireNonNull(currentLine);
-
-            final int idleColumnIndex = 11;
-            String[] splittedString = currentLine.replaceAll(",", ".").split("\\s+");
-            Double idleValue = Double.parseDouble(splittedString[idleColumnIndex]);
-
-            Map<String, Double> cpuUsageList = new HashMap<String, Double>();
-            cpuUsageList.put("All", 100 - idleValue);
-
-            int i = 0;
-
-            while ((currentLine = reader.readLine()) != null && currentLine.length() > 1) {
-                splittedString = currentLine.replaceAll(",", ".").split("\\s+");
-                idleValue = Double.parseDouble(splittedString[idleColumnIndex]);
-
-                cpuUsageList.put(String.valueOf(i), 100 - idleValue);
-                ++i;
-            }
-
-            return cpuUsageList.size() - 1;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        return 0;
-    }
-
-    // Преобразовать в строчку
-    public String toString() {
-        final Process process = executeMpstatCommand();
-        try (InputStream is = process.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
-
-            reader.readLine();
-            reader.readLine();
-            reader.readLine();
-
-            String currentLine = reader.readLine();
-            Objects.requireNonNull(currentLine);
-
-            final int idleColumnIndex = 11;
-            String[] splittedString = currentLine.replaceAll(",", ".").split("\\s+");
-            Double idleValue = Double.parseDouble(splittedString[idleColumnIndex]);
-
-            final Map<String, Double> cpuUsageList = new HashMap<>();
-            cpuUsageList.put("All", 100 - idleValue);
-
-            int i = 0;
-
-            while ((currentLine = reader.readLine()) != null && currentLine.length() > 1) {
-                splittedString = currentLine.replaceAll(",", ".").split("\\s+");
-                idleValue = Double.parseDouble(splittedString[idleColumnIndex]);
-
-                cpuUsageList.put(String.valueOf(i), 100 - idleValue);
-                ++i;
-            }
-
-            return cpuUsageList.toString();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        return "";
     }
 
     private Process executeMpstatCommand() {
         try {
             return Runtime.getRuntime().exec(MPSTAT_COMMAND);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Can't execute mpstat command.\nMake sure " +
+                    "that you use Linux and have mpstat", e);
+        }
+    }
+
+    private void skipThreeLines(final BufferedReader reader) throws IOException {
+        for (int i = 0; i < 3; i++) {
+            reader.readLine();
+        }
+    }
+
+    private void putAllCpuUsage(final Map<String, Double> cpuUsage, final BufferedReader reader) throws IOException {
+        final String averageStatistics = reader.readLine();
+        Objects.requireNonNull(averageStatistics);
+        final String[] splittedStrings = averageStatistics.replaceAll(",", ".").split(WHITE_SPACE_SPLITTER);
+        final Double idleValue = Double.parseDouble(splittedStrings[IDLE_COLUMN_INDEX]);
+        cpuUsage.put("All", 100 - idleValue);
+    }
+
+    private void putEveryCoreUsage(final Map<String, Double> cpuUsage, final BufferedReader reader) throws IOException {
+        int i = 0;
+        String statisticsAboutCurrentCore;
+        while ((statisticsAboutCurrentCore = reader.readLine()) != null && statisticsAboutCurrentCore.length() > 1) {
+            final String[] splittedStrings = statisticsAboutCurrentCore.replaceAll(",", ".").split(WHITE_SPACE_SPLITTER);
+            final Double idleValue = Double.parseDouble(splittedStrings[IDLE_COLUMN_INDEX]);
+            cpuUsage.put(String.valueOf(i), 100 - idleValue);
+            ++i;
         }
     }
 
