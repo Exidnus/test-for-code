@@ -5,6 +5,7 @@
     <groupId>org.test</groupId>
     <artifactId>code</artifactId>
     <version>1.0-SHAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>1.8</java.version>
