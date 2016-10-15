@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
  */
 public class CPUMonitorTest {
 
-    private final ICPUMonitor cpuMonitor = ICPUMonitor.getDefaultImpl();
+    private final ICPUMonitor cpuMonitor = ICPUMonitor.getLinuxMpstatImpl();
 
     @Test
     public void shouldGetAllCpuUsage() {

@@ -10,7 +10,7 @@ public interface ICPUMonitor {
 
     double getCpuUsage();
 
-    static ICPUMonitor getDefaultImpl() {
+    static ICPUMonitor getLinuxMpstatImpl() {
         return new CPUMonitor();
     }
 
