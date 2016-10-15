@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CPUMonitor implements ICPUMonitor {
+class CPUMonitor implements ICPUMonitor {
     enum Result {
         OK, FAIL;
     }
@@ -95,7 +95,7 @@ public class CPUMonitor implements ICPUMonitor {
     }
 
     @Override
-    public Map<String, Double> gEtaLL_CPU_Usage() {
+    public Map<String, Double> getAllCpuUsage() {
         BufferedReader msR = null;
         try {
             if (p != null) {
@@ -152,8 +152,14 @@ public class CPUMonitor implements ICPUMonitor {
         return null;
     }
 
+    @Deprecated
     @Override
-    public int get_Count_Of_CoreМетод() {
+    public Map<String, Double> gEtaLL_CPU_Usage() {
+        return getAllCpuUsage();
+    }
+
+    @Override
+    public int getCountOfCores() {
         BufferedReader чтец = null;
         try {
             if (p != null) {
@@ -214,6 +220,11 @@ public class CPUMonitor implements ICPUMonitor {
         return 0;
     }
 
+    @Deprecated
+    @Override
+    public int get_Count_Of_CoreМетод() {
+        return getCountOfCores();
+    }
 
     // Преобразовать в строчку
     public String toString() {

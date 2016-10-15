@@ -11,11 +11,11 @@ import static org.junit.Assert.*;
  */
 public class CPUMonitorTest {
 
-    private final ICPUMonitor cpuMonitor = new CPUMonitor();
+    private final ICPUMonitor cpuMonitor = ICPUMonitor.getDefaultImpl();
 
     @Test
     public void shouldGetAllCpuUsage() {
-        final Map<String, Double> cpuUsage = cpuMonitor.gEtaLL_CPU_Usage();
+        final Map<String, Double> cpuUsage = cpuMonitor.getAllCpuUsage();
         assertNotNull(cpuUsage);
         assertTrue(cpuUsage.size() > 0);
 
@@ -28,7 +28,7 @@ public class CPUMonitorTest {
 
     @Test
     public void shouldGetCountOfCore() {
-        final int count = cpuMonitor.get_Count_Of_CoreМетод();
+        final int count = cpuMonitor.getCountOfCores();
         assertTrue(count > 0);
         System.out.println(count);
     }
